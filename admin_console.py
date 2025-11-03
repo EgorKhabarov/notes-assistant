@@ -49,7 +49,7 @@ def execute(
     with db.connect():
         result = db.execute(
             query,
-            params,
+            params or {},
             commit,
             column_names=True,
         )

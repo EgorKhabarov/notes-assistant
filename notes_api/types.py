@@ -173,8 +173,7 @@ class DataBase:
         if conn is None:
             raise RuntimeError("db connection is None. Use `with db.connect():`")
 
-        result = []
-        cursor: CursorResult | None = None
+        result: list[str | int | bytes] = []
 
         try:
             if script:
@@ -187,20 +186,25 @@ class DataBase:
                     raw_cursor = raw_conn.cursor()
                     raw_cursor.execute(query, params)
                     if raw_cursor.description:
+                        # noinspection PyTypeChecker
                         result = raw_cursor.fetchall()
+                        if column_names:
+                            description = [column[0] for column in raw_cursor.description]
+                            result = [description] + result
                 else:
-                    cursor = conn.execute(sqlalchemy_text(query), params)
+                    cursor: CursorResult = conn.execute(sqlalchemy_text(query), params)
                     if cursor.returns_rows:
+                        # noinspection PyTypeChecker
                         result = cursor.fetchall()
+
+                        if column_names and cursor and result:
+                            keys = cursor.keys()
+                            result = [list(keys)] + result
 
             if commit:
                 conn.commit()
         except Error as e:
             raise DataBaseError(e)
-
-        if column_names and cursor and result:
-            keys = cursor.keys()
-            result = [list(keys)] + result
 
         # noinspection PyTypeChecker
         return result
