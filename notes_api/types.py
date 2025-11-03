@@ -189,7 +189,9 @@ class DataBase:
                         # noinspection PyTypeChecker
                         result = raw_cursor.fetchall()
                         if column_names:
-                            description = [column[0] for column in raw_cursor.description]
+                            description = [
+                                column[0] for column in raw_cursor.description
+                            ]
                             result = [description] + result
                 else:
                     cursor: CursorResult = conn.execute(sqlalchemy_text(query), params)
