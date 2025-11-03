@@ -454,10 +454,13 @@ def command_handler(message: Message) -> None:
                     )
                 ).strip()
             )
-        except ApiError:
-            TextMessage(get_translate("errors.invalid_request")).send()
-            generated = help_message("CommandOpen", "page commands")
-        generated.send()
+            generated.send()
+        except ApiError as e:
+            if f"{e}" == "Invalid date":
+                TextMessage(get_translate("errors.invalid_date")).send()
+            else:
+                TextMessage(get_translate("errors.invalid_request")).send()
+                help_message("CommandOpen", "page commands")
 
 
 _handlers = {}

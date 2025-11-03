@@ -1993,7 +1993,7 @@ def open_message(arguments: str) -> TextMessage | None:
     regex_year = re.compile(r"^(?P<year>\d{4})$")
     regex_year_month = re.compile(r"^(?P<year>\d{4}) (?P<month>\d{1,2})$")
     regex_year_month_day = re.compile(
-        r"^(?P<year>\d{4}) (?P<month>\d{1,2}) (?P<day>\d{1,2})(?: page (?P<page>[1-9]|[1-3][0-9]|40))?$"
+        r"^(?P<year>\d{4}) (?P<month>\d{1,2}) (?P<day>\d{1,2})(?: page (?P<page>[1-9]|[1-3][0-9]|40|0))?$"
     )
 
     if arguments.startswith(("calendar today", "calendar now", "today", "now")):
@@ -2019,7 +2019,7 @@ def open_message(arguments: str) -> TextMessage | None:
 
     elif m := regex_year_month.match(arguments.removeprefix("calendar ")):
         year, month = int(m.group("year")), int(m.group("month"))
-        if not is_valid_year(year):
+        if not is_valid_year(year) or not 0 < month < 13:
             raise ApiError("Invalid date")
         return monthly_calendar_message((year, month), "dl", "mnm")
 
@@ -2028,12 +2028,15 @@ def open_message(arguments: str) -> TextMessage | None:
             int(m.group("year")),
             int(m.group("month")),
             int(m.group("day")),
-            int(m.group("page")),
+            int(m.group("page")) if m.group("page") else 0,
         )
         if not is_valid_year(year):
             raise ApiError("Invalid date")
 
-        date = datetime(year, month, day).strftime("%d.%m.%Y")
+        try:
+            date = datetime(year, month, day).strftime("%d.%m.%Y")
+        except ValueError:
+            raise ApiError("Invalid date")
 
         if page > 1:
             generated = daily_message(date)
