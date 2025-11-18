@@ -144,7 +144,17 @@ def add_status_effect(text: str, statuses: list[str]) -> str:
         lst = _text.splitlines()
 
         # We get the length of the indent so that it does not move
-        width = len(str(len(tuple(line for line in lst if not is_comment_line(line)))))
+        width = len(
+            str(
+                len(
+                    tuple(
+                        line
+                        for line in lst
+                        if line.strip() and not is_comment_line(line)
+                    )
+                )
+            )
+        )
 
         # Fill in indented numbers + text, and if there is a double line break then ""
         return "\n".join(
@@ -152,10 +162,10 @@ def add_status_effect(text: str, statuses: list[str]) -> str:
                 (
                     "".join(
                         (
-                            (
-                                "0️⃣" * (width - len(str(num := num + 1)))
-                            ),  # Put zeros in front of the base number
-                            chr(8419).join(str(num)),  # The number itself
+                            # Put zeros in front of the base number
+                            "0️⃣" * (width - len(str(num := num + 1))),
+                            # The number itself
+                            chr(8419).join(str(num)),
                             chr(8419),
                             " ",
                             line,
