@@ -15,7 +15,7 @@ from datetime import datetime, timedelta, timezone
 # noinspection PyPackageRequirements
 from contextvars import ContextVar
 
-from sqlalchemy import create_engine, text as sqlalchemy_text, event
+from sqlalchemy import create_engine, text as sqlalchemy_text, event as sqlalchemy_event
 from sqlalchemy.engine import Engine, Connection, CursorResult
 
 import config
@@ -120,7 +120,7 @@ class DataBase:
     def __init__(self):
         self._functions: dict[str, tuple[int, Callable]] = {}
 
-        @event.listens_for(engine, "connect")
+        @sqlalchemy_event.listens_for(engine, "connect")
         def register_functions(dbapi_connection, connection_record):
             for name, (argc, func) in self._functions.items():
                 dbapi_connection.create_function(name, argc, func)
@@ -765,7 +765,7 @@ SELECT media_id,
         }
 
     @staticmethod
-    def de_json(json_string) -> "Event":
+    def de_json(json_string: str) -> "Event":
         return Event(**json.loads(json_string))
 
 
