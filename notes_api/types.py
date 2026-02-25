@@ -2094,9 +2094,7 @@ SELECT lang,
 UPDATE users_settings
    SET {}
  WHERE user_id = :user_id;
-""".format(
-                    ", ".join(f"{update} = :{update}" for update in update_list)
-                ),
+""".format(", ".join(f"{update} = :{update}" for update in update_list)),
                 params={
                     "lang": lang,
                     "sub_urls": sub_urls,

@@ -36,9 +36,7 @@ class Chat:
         *funcs: Callable[[str, str, dict[str, str | int | dict[str, str | int]]], bool],
     ):
         length: int = len(funcs)
-        assert (
-            len(self.history) == length
-        ), f"""
+        assert len(self.history) == length, f"""
 len(
 {pformat(self.history, sort_dicts=False)}
 ) != {length}
@@ -47,9 +45,7 @@ len(
         for n, func in enumerate(funcs):
             import inspect
 
-            assert func(
-                *self.history[n].values()
-            ), f"""
+            assert func(*self.history[n].values()), f"""
 (
     {ljust(inspect.getsource(func))}
 )(

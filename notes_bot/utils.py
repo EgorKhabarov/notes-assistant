@@ -553,15 +553,12 @@ def generate_search_sql_condition(query: str, filters: list[list[str]]):
     except ValueError:
         query_words = query.split()
 
-    splitquery = " OR ".join(
-        """
+    splitquery = " OR ".join("""
 date LIKE '%' || ? || '%'
  OR text LIKE '%' || ? || '%'
  OR statuses LIKE '%' || ? || '%'
  OR event_id LIKE '%' || ? || '%'
-"""
-        for _ in query_words
-    )
+""" for _ in query_words)
     filters_conditions_date = []
     filters_conditions_date_e = []
     filters_conditions_status = []
@@ -588,15 +585,12 @@ date LIKE '%' || ? || '%'
             statuses = status.split(",")
 
             if condition == "=":
-                filters_conditions_status.append(
-                    f"""
+                filters_conditions_status.append(f"""
 statuses {condition}= JSON_ARRAY({','.join('?' for _ in statuses)})
-"""
-                )
+""")
                 filters_params_status.extend(statuses)
             if condition == "≠":
-                filters_conditions_status.append(
-                    f"""
+                filters_conditions_status.append(f"""
 (
     NOT EXISTS (
         SELECT value
@@ -604,12 +598,10 @@ statuses {condition}= JSON_ARRAY({','.join('?' for _ in statuses)})
          WHERE value IN ({','.join('?' for _ in statuses)})
     )
 )
-"""
-                )
+""")
                 filters_params_status.extend(statuses)
             else:
-                filters_conditions_status.append(
-                    f"""
+                filters_conditions_status.append(f"""
 (
     EXISTS (
         SELECT value
@@ -617,8 +609,7 @@ statuses {condition}= JSON_ARRAY({','.join('?' for _ in statuses)})
          WHERE value IN ({','.join('?' for _ in statuses)})
     )
 )
-"""
-                )
+""")
                 filters_params_status.extend(statuses)
 
     n = "\n"

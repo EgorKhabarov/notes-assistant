@@ -91,7 +91,7 @@ def rate_limit(
     key_func: Callable = hashkey,
     else_func: Callable = lambda args, kwargs, key, sec: (key, sec),
 ):
-    def decorator(func):
+    def decorator(func: Callable):
         @wraps(func)
         def wrapper(*args, **kwargs):
             key = key_func(*args, **kwargs)

@@ -365,9 +365,7 @@ UPDATE tg_settings
    SET {}
  WHERE user_id IS :user_id
        AND group_id IS :group_id;
-""".format(
-                    ", ".join(f"{update} = :{update}" for update in update_list)
-                ),
+""".format(", ".join(f"{update} = :{update}" for update in update_list)),
                 params={
                     "lang": lang,
                     "sub_urls": sub_urls,

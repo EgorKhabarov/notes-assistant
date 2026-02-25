@@ -545,7 +545,7 @@ def create_select_status_keyboard(
             f"buttons.select_status.{folder_path}"
         )
 
-        def unique_string_statuses(row) -> str:
+        def unique_string_statuses(row: str) -> str:
             new_status = row.split(maxsplit=1)[0]
 
             if new_status == "⬜":
