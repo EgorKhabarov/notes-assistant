@@ -68,36 +68,27 @@ class Cycle:
 
 def telegram_log(action: str, text: str):
     text = text.replace("\n", "\\n")
+    entity_type = str(request.entity_type).capitalize()
+    chat_id = request.chat_id
     thread_id = getattr(request.query, "message", request.query).message_thread_id
+    thread_id_str = f":{thread_id}" if thread_id else ""
+
+    is_not_in_white_list = config.WHITE_LIST and request.chat_id not in config.WHITE_LIST
+    is_in_black_list = config.BLACK_LIST and request.chat_id in config.BLACK_LIST
+
     if request.entity:
-        entity_type = str(request.entity_type).capitalize()
         request_id = request.entity.request_id
         request_chat_id = request.entity.request_chat_id
-        thread_id = f":{thread_id}" if thread_id else ""
-        status = (
-            request.entity.user.user_status
-            if request.is_user
-            else request.entity.group.member_status
-        )
-        logger.info(
-            f"[{entity_type}:{request_id}]"
-            f"[{request_chat_id:<10}{thread_id}]"
-            f"[{status}].{action} {text}"
-        )
-    elif config.WHITE_LIST and request.chat_id not in config.WHITE_LIST:
-        entity_type = str(request.entity_type).capitalize()
-        chat_id = request.chat_id
-        thread_id = f":{thread_id}" if thread_id else ""
-        logger.info(
-            f"[Not WHITELIST {entity_type}][{chat_id:<10}{thread_id}].{action} {text}"
-        )
+        status = request.entity.user.user_status if request.is_user else request.entity.group.member_status
+        logger.info(f"[{entity_type}:{request_id}][{request_chat_id:<10}{thread_id_str}][{status}].{action} {text}")
     else:
-        entity_type = str(request.entity_type).capitalize()
-        chat_id = request.chat_id
-        thread_id = f":{thread_id}" if thread_id else ""
-        logger.info(
-            f"[Not Login {entity_type}][{chat_id:<10}{thread_id}].{action} {text}"
-        )
+        if is_not_in_white_list:
+            message = f"{entity_type} Not In WHITELIST"
+        elif is_in_black_list:
+            message = f"{entity_type} In BLACKLIST"
+        else:
+            message = f"Not Login {entity_type}"
+        logger.info(f"[{message}][{chat_id:<10}{thread_id_str}].{action} {text}")
 
 
 def add_status_effect(text: str, statuses: list[str]) -> str:

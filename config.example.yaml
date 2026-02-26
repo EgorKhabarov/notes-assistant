@@ -29,3 +29,6 @@ ADMIN_IDS:  # list of admins chat_id
 
 WHITE_LIST:  # list of chat_id
   - your_chat_id
+
+BLACK_LIST:  # list of chat_id
+  - banned_chat_id
