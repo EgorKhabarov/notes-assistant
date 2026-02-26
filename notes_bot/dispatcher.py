@@ -8,6 +8,7 @@ from telebot.types import Message, CallbackQuery
 from telebot.apihelper import ApiTelegramException
 from cachetools import LRUCache
 
+import config
 from notes_bot.request import request
 from notes_bot.lang import get_translate
 from notes_bot.utils import telegram_log
@@ -89,6 +90,12 @@ def process_account(func):
     @wraps(func)
     def check_argument(_x: Message | CallbackQuery):
         request.set(_x)
+        if config.WHITE_LIST and request.chat_id not in config.WHITE_LIST:
+            if request.is_message:
+                telegram_log("send", request.message.text[:40])
+            else:
+                telegram_log("press", request.data)
+            return
         with db.connect():
             if request.is_message:
                 add_chat_cached(_x)

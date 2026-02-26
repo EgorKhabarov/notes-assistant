@@ -84,6 +84,13 @@ def telegram_log(action: str, text: str):
             f"[{request_chat_id:<10}{thread_id}]"
             f"[{status}].{action} {text}"
         )
+    elif config.WHITE_LIST and request.chat_id not in config.WHITE_LIST:
+        entity_type = str(request.entity_type).capitalize()
+        chat_id = request.chat_id
+        thread_id = f":{thread_id}" if thread_id else ""
+        logger.info(
+            f"[Not WHITELIST {entity_type}][{chat_id:<10}{thread_id}].{action} {text}"
+        )
     else:
         entity_type = str(request.entity_type).capitalize()
         chat_id = request.chat_id

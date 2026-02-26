@@ -26,3 +26,6 @@ WSGI_PATH: ""  # WSGI file path. For PythonAnyWhere "/var/www/<your_username>_py
 
 ADMIN_IDS:  # list of admins chat_id
   - admin_chat_id
+
+WHITE_LIST:  # list of chat_id
+  - your_chat_id
