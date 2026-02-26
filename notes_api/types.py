@@ -121,7 +121,7 @@ class DataBase:
         self._functions: dict[str, tuple[int, Callable]] = {}
 
         @sqlalchemy_event.listens_for(engine, "connect")
-        def register_functions(dbapi_connection, connection_record):
+        def register_functions(dbapi_connection, _connection_record):
             for name, (argc, func) in self._functions.items():
                 dbapi_connection.create_function(name, argc, func)
 
@@ -1557,7 +1557,7 @@ SELECT 1
         if group_id is not None and group_id != self.group_id:
             return self.get_group_member(user_id, group_id).member_status >= 1
 
-        if self.group_id and self.group.member_status:
+        if self.group_id and self.group and self.group.member_status:
             return self.group.member_status >= 1
 
         return False
@@ -1568,7 +1568,7 @@ SELECT 1
         if (group_id is not None) and group_id != self.group_id:
             return self.get_group_member(user_id, group_id).member_status >= 2
 
-        if self.group_id and self.group.member_status:
+        if self.group_id and self.group and self.group.member_status:
             return self.group.member_status >= 2
 
         return False

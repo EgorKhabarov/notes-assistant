@@ -92,7 +92,7 @@ def generate_buttons(
 
     match keyboard_type:
         case "inline":
-            keyboard = []
+            keyboard: list[list[InlineKeyboardButton]] = []
             for row in buttons_data:
                 keyboard.append([])
                 for button in row:

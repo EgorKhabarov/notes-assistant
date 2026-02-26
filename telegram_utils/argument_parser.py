@@ -12,7 +12,7 @@ _data_types: TypeAlias = (
         "long str",
     ]
 )
-_return_types: TypeAlias = str | int | float | datetime | list[int] | None | Any
+_return_types: TypeAlias = str | int | float | datetime | list[int] | None
 
 
 def get_arguments(
