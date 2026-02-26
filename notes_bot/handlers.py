@@ -676,9 +676,8 @@ class CallBackHandler:
         updated = str_prefix == "esc"
         if updated:
             try:
-                CallBackAnswer(get_translate("errors.settings.commit_changes")).answer(
-                    show_alert=True
-                )
+                text = get_translate("errors.settings.commit_changes")
+                CallBackAnswer(text).answer(show_alert=True)
             except ApiTelegramException:
                 pass
         generated = event_status_message(statuses, folder, event_id, date, updated)
@@ -1333,15 +1332,18 @@ class CallBackHandler:
                     break
 
         try:
-            settings_message(**params, updated=str_prefix == "stu").edit()
+            settings_message(
+                **params,
+                updated=str_prefix == "stu",
+                commit=str_prefix == "stuc",
+            ).edit()
         except ApiTelegramException:
             pass
 
         if str_prefix == "stuc":
             try:
-                CallBackAnswer(get_translate("errors.settings.commit_changes")).answer(
-                    show_alert=True
-                )
+                text = get_translate("errors.settings.commit_changes")
+                CallBackAnswer(text).answer(show_alert=True)
             except ApiTelegramException:
                 pass
 

@@ -133,6 +133,7 @@ def settings_message(
     notifications_time: str = ...,
     theme: int = ...,
     updated: bool = False,
+    commit: bool = False,
 ) -> TextMessage:
     """
     Sets settings for user chat_id
@@ -301,7 +302,10 @@ def settings_message(
             [
                 {get_theme_emoji("back"): commit_changes("mnm")},
                 {"🗂": commit_changes("frd")},
-                {"💾": format_call_data(prefix="sts")},
+                {"💾": {
+                    "callback_data": format_call_data(prefix="sts"),
+                    "style": "danger" if commit else "primary" if updated else None,
+                }},
             ],
         ]
     )
@@ -544,9 +548,10 @@ def event_message(
     else:
         delete_permanently_translate = get_translate("text.delete_permanently")
         recover_translate = get_translate("text.recover")
-        delete_permanently_button = (
-            f"bed {event_id}" if is_deletion_confirmed else f"bemc {event_id}"
-        )
+        delete_permanently_button = {
+            "callback_data": f"bed {event_id}" if is_deletion_confirmed else f"bemc {event_id}",
+            "style": "danger" if is_deletion_confirmed else None,
+        }
         markup = [
             [
                 {f"❌ {delete_permanently_translate}": delete_permanently_button},
@@ -590,9 +595,10 @@ AND removal_time IS {'NOT' if is_in_wastebasket else ''} NULL
         args_key = "b"
         delete_permanently_translate = get_translate("text.delete_permanently")
         recover_translate = get_translate("text.recover")
-        delete_permanently_button = (
-            f"bsd {string_id}" if is_deletion_confirmed else f"bsmc {string_id}"
-        )
+        delete_permanently_button = {
+            "callback_data": f"bsd {string_id}" if is_deletion_confirmed else f"bsmc {string_id}",
+            "style": "danger" if is_deletion_confirmed else None,
+        }
         markup = [
             [
                 {f"❌ {delete_permanently_translate}": delete_permanently_button},
@@ -757,7 +763,10 @@ def event_history_message(
             {get_theme_emoji("back"): f"em {event_id}"},
             (
                 {
-                    "🧹": f"{'ehcc' if commit_clear_history else 'ehc'} {event_id} {date:%d.%m.%Y}"
+                    "🧹": {
+                        "callback_data": f"{'ehcc' if commit_clear_history else 'ehc'} {event_id} {date:%d.%m.%Y}",
+                        "style": "danger" if commit_clear_history else None,
+                    }
                 }
                 if event.history
                 else {}
@@ -1029,11 +1038,12 @@ def before_event_delete_message(
 
     delete_permanently = get_translate("text.delete_permanently")
     trash_bin = get_translate("text.trash_bin")
-    delete_permanently_button = (
-        f"ed {event.event_id} {event.date}"
+    delete_permanently_button = {
+        "callback_data": f"ed {event.event_id} {event.date}"
         if is_deletion_confirmed
-        else f"ebdc {event.event_id} {event.date}"
-    )
+        else f"ebdc {event.event_id} {event.date}",
+        "style": "danger" if is_deletion_confirmed else None,
+    }
     markup = generate_buttons(
         [
             [
@@ -1078,9 +1088,10 @@ AND removal_time IS NULL
     date = generated.event_list[0].date if generated.event_list else ""
     delete_permanently = get_translate("text.delete_permanently")
     trash_bin = get_translate("text.trash_bin")
-    delete_permanently_button = (
-        f"esd {string_id} {date}" if is_deletion_confirmed else f"esbdc {string_id}"
-    )
+    delete_permanently_button = {
+        "callback_data": f"esd {string_id} {date}" if is_deletion_confirmed else f"esbdc {string_id}",
+        "style": "danger" if is_deletion_confirmed else None,
+    }
     markup = [
         [
             {f"❌ {delete_permanently}": delete_permanently_button},
@@ -1392,7 +1403,12 @@ DELETE FROM events
         [
             [{"🔼": "None"}, {"↕️": "None"}],
             [
-                {f"🧹 {clean_bin_translate}": "bcl" if cleansing_confirmed else "bclc"},
+                {
+                    f"🧹 {clean_bin_translate}": {
+                        "callback_data": "bcl" if cleansing_confirmed else "bclc",
+                        "style": "danger" if cleansing_confirmed else None,
+                    }
+                },
                 {"🔄": "mnb"},
             ],
             [{get_theme_emoji("back"): "mnm"}],
@@ -1887,7 +1903,10 @@ def account_message(message_id: int | None = None) -> TextMessage:
             [
                 {get_theme_emoji("back"): "mnm"},
                 {"📊": "lm now"},
-                {f"{get_translate('text.logout')}🚪👈": "logout"},
+                {f"{get_translate('text.logout')}🚪👈": {
+                    "callback_data": "logout",
+                    "style": "danger",
+                }},
             ],
         ]
     )

@@ -133,7 +133,11 @@ SELECT DISTINCT CAST (STRFTIME('%w', {sqlite_format_date('date')}) - 1 AS INT)
     first_line = [{title: f"cy ({command},{back},{year},{arguments})"}]
 
     buttons_lines = []
-    today = request.entity.now_time().day
+    entity_now_time = request.entity.now_time()
+    is_now_year = entity_now_time.year == year
+    is_now_month = entity_now_time.month == month
+    today = entity_now_time.day
+
     for week_calendar in row_calendar:
         week_buttons = []
         for wd, day in enumerate(week_calendar):
@@ -145,22 +149,22 @@ SELECT DISTINCT CAST (STRFTIME('%w', {sqlite_format_date('date')}) - 1 AS INT)
                 tag_event = (number_to_power(x) if x < 10 else "*") if x else ""
                 tag_birthday = "!" if (day in every_year_or_month) else ""
                 date = f"{day:0>2}.{month:0>2}.{year}"
-                week_buttons.append(
-                    {
-                        f"{tag_today}{day}{tag_event}{tag_birthday}": (
-                            f"{command[1:-1] if command else 'dl'} "
-                            + (
-                                (
-                                    f"{arguments[1:-1].format(date)}"
-                                    if "{}" in arguments[1:-1]
-                                    else f"{arguments[1:-1]} {date}"
-                                )
-                                if arguments
-                                else date
+                button_data = {
+                    "callback_data": (
+                        f"{command[1:-1] if command else 'dl'} "
+                        + (
+                            (
+                                f"{arguments[1:-1].format(date)}"
+                                if "{}" in arguments[1:-1]
+                                else f"{arguments[1:-1]} {date}"
                             )
-                        ).strip()
-                    }
-                )
+                            if arguments
+                            else date
+                        )
+                    ).strip(),
+                    "style": "primary" if is_now_year and is_now_month and today == day else None,
+                }
+                week_buttons.append({f"{tag_today}{day}{tag_event}{tag_birthday}": button_data})
         buttons_lines.append(week_buttons)
 
     arrows_buttons = [
@@ -181,11 +185,7 @@ SELECT DISTINCT CAST (STRFTIME('%w', {sqlite_format_date('date')}) - 1 AS INT)
         arrows_buttons,
         [
             (
-                {
-                    get_theme_emoji("back"): (
-                        f"{back[1:-1]}{f' {arguments[1:-1]}' if arguments else ''}"
-                    )
-                }
+                {get_theme_emoji("back"): f"{back[1:-1]}{f' {arguments[1:-1]}' if arguments else ''}"}
                 if back
                 else {}
             ),
@@ -282,7 +282,9 @@ SELECT date
         )
     ]
 
-    now_month = request.entity.now_time().month
+    entity_now_time = request.entity.now_time()
+    now_month = entity_now_time.month
+    is_now_year = entity_now_time.year == year
 
     month_buttons = []
     for row in get_translate("arrays.months_list"):
@@ -292,20 +294,14 @@ SELECT date
             x = month_list.get(numm)
             tag_event = (number_to_power(x) if x < 1000 else "*") if x else ""
             tag_birthday = "!" if (numm in every_year or every_month) else ""
-            month_buttons[-1].append(
-                {
-                    f"{tag_today}{nameM}{tag_event}{tag_birthday}": (
-                        f"cm ({command},{back},({year},{numm}),{arguments})"
-                    )
-                }
-            )
+            button_data = {
+                "callback_data": f"cm ({command},{back},({year},{numm}),{arguments})",
+                "style": "primary" if is_now_year and numm == now_month else None,
+            }
+            month_buttons[-1].append({f"{tag_today}{nameM}{tag_event}{tag_birthday}": button_data})
 
     markup = [
-        [
-            {
-                f"{year} ({year_info(year)})": f"ct ({command},{back},{str(year)[:3]},{arguments})"
-            }
-        ],
+        [{f"{year} ({year_info(year)})": f"ct ({command},{back},{str(year)[:3]},{arguments})"}],
         *month_buttons,
         [
             {text: f"cy ({command},{back},{y},{arguments})"}
@@ -313,11 +309,7 @@ SELECT date
         ],
         [
             (
-                {
-                    get_theme_emoji("back"): (
-                        f"{back[1:-1]}" f"{f' {arguments[1:-1]}' if arguments else ''}"
-                    )
-                }
+                {get_theme_emoji("back"): f"{back[1:-1]}" f"{f' {arguments[1:-1]}' if arguments else ''}"}
                 if back
                 else {}
             ),
@@ -403,13 +395,11 @@ SELECT 1
             x = year_list.get(numY)
             tag_event = (number_to_power(x) if x < 1000 else "*") if x else ""
             tag_birthday = "!" if every_year else ""
-            years_buttons[-1].append(
-                {
-                    f"{tag_today}{numY}{tag_event}{tag_birthday}": (
-                        f"cy ({command},{back},{numY},{arguments})"
-                    )
-                }
-            )
+            button_data = {
+                "callback_data": f"cy ({command},{back},{numY},{arguments})",
+                "style": "primary" if numY == now_year else None,
+            }
+            years_buttons[-1].append({f"{tag_today}{numY}{tag_event}{tag_birthday}": button_data})
 
     markup = generate_buttons(
         [
@@ -424,11 +414,7 @@ SELECT 1
             ],
             [
                 (
-                    {
-                        get_theme_emoji("back"): (
-                            f"{back[1:-1]}{f' {arguments[1:-1]}' if arguments else ''}"
-                        )
-                    }
+                    {get_theme_emoji("back"): f"{back[1:-1]}{f' {arguments[1:-1]}' if arguments else ''}"}
                     if back
                     else {}
                 ),
@@ -506,9 +492,7 @@ def create_select_status_keyboard(
             [
                 *[
                     [
-                        {
-                            f"{title:{config.ts}<80}": f"{prefix} {string_statuses} {folder} {arguments}"
-                        }
+                        {f"{title:{config.ts}<80}": f"{prefix} {string_statuses} {folder} {arguments}"}
                         for (title, folder) in row
                     ]
                     for row in buttons_data
@@ -541,9 +525,7 @@ def create_select_status_keyboard(
             ]
         )
     else:
-        buttons_data: tuple[tuple[str]] = get_translate(
-            f"buttons.select_status.{folder_path}"
-        )
+        buttons_data: tuple[tuple[str]] = get_translate(f"buttons.select_status.{folder_path}")
 
         def unique_string_statuses(row: str) -> str:
             new_status = row.split(maxsplit=1)[0]
@@ -569,13 +551,7 @@ def create_select_status_keyboard(
                     ]
                     for status_column in buttons_data
                 ],
-                [
-                    {
-                        get_theme_emoji("back"): (
-                            f"{prefix} {string_statuses} folders {arguments}"
-                        )
-                    }
-                ],
+                [{get_theme_emoji("back"): f"{prefix} {string_statuses} folders {arguments}"}],
             ]
         )
 
